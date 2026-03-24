@@ -1,4 +1,4 @@
-# media-tools
+# xiaohongshu
 
 自媒体执行工具集 — OpenClaw Agent Skill
 
@@ -16,7 +16,7 @@ wemedia（自媒体运营：决定发什么、什么时候发）
     ↓
 main（编排调度）
     ↓
-media-tools（自媒体执行：发布、数据采集、知识管道）
+xiaohongshu（自媒体执行：发布、数据采集、知识管道）
 ```
 
 ## 能力
@@ -36,7 +36,7 @@ media-tools（自媒体执行：发布、数据采集、知识管道）
 
 - **采集**：X 帖子、小红书竞品、技术博客、自家数据
 - **查询**：选题差异化分析、内容策略建议
-- **共享**：media-tools 维护 notebook，wemedia Step 2 前置链调用查询
+- **共享**：xiaohongshu 维护 notebook，wemedia Step 2 前置链调用查询
 
 ## 快速开始
 
@@ -49,7 +49,7 @@ media-tools（自媒体执行：发布、数据采集、知识管道）
 ### 发布示例
 
 ```bash
-cd ~/.openclaw/skills/media-tools
+cd ~/.openclaw/skills/xiaohongshu
 python3 scripts/publish_pipeline.py \
   --title "标题" \
   --content "正文内容" \
@@ -68,7 +68,7 @@ python3 scripts/cdp_publish.py --headless search-feeds --keyword "AI编程"
 ## 目录结构
 
 ```
-media-tools/
+xiaohongshu/
 ├── SKILL.md              # Agent skill 定义（职责边界、路由规则、Hard Rules）
 ├── README.md             # 本文件
 ├── persona.md            # 人设配置（待填写）
@@ -104,7 +104,7 @@ media-tools/
 
 ## 与 wemedia 的关系
 
-| media-tools（自媒体执行） | wemedia](https://github.com/mouseroser/wemedia-skill)（自媒体运营） |
+| xiaohongshu（自媒体执行） | wemedia](https://github.com/mouseroser/wemedia-skill)（自媒体运营） |
 |----------------------|------------------|
 | CDP 脚本执行 | 选题发现与评估 |
 | 竞品数据采集 | 内容队列维护 |

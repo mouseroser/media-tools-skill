@@ -53,11 +53,11 @@ python3 --version  # 需 3.10+
 
 ## 安装步骤
 
-### Step 1：安装 media-tools skill
+### Step 1：安装 xiaohongshu skill
 
 ```bash
 # 克隆两个项目并融合
-SKILLS_DIR=~/.openclaw/skills/media-tools
+SKILLS_DIR=~/.openclaw/skills/xiaohongshu
 mkdir -p $SKILLS_DIR
 
 # 从 XiaohongshuSkills 获取执行层
@@ -201,7 +201,7 @@ openclaw cron add \
 ### 发布命令参考
 
 ```bash
-cd ~/.openclaw/skills/media-tools
+cd ~/.openclaw/skills/xiaohongshu
 
 # 检查登录状态
 python3 scripts/cdp_publish.py check-login
@@ -288,7 +288,7 @@ notebooklm source remove -n <notebook_id> <source_id>
 ## 文件结构
 
 ```
-~/.openclaw/skills/media-tools/
+~/.openclaw/skills/xiaohongshu/
 ├── SKILL.md              ← 路由规则 + 使用说明
 ├── persona.md            ← 账号人设定位
 ├── scripts/
