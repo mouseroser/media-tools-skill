@@ -14,6 +14,8 @@ Usage:
     python account_manager.py set-default <name>
 """
 
+from __future__ import annotations
+
 import json
 import os
 import sys

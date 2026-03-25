@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Unified publish pipeline for Xiaohongshu.
 

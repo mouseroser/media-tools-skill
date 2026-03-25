@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 CDP-based Xiaohongshu publisher.
 

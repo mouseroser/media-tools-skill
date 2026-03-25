@@ -1,6 +1,6 @@
 ---
 name: xiaohongshu
-description: "小红书创作者 CDP 执行工具。负责：发布（publish_pipeline.py）、竞品搜索、数据看板、评论回复、NLM 知识采集。不负责内容创作，由 wemedia 编排层调用。"
+description: "小红书创作者 CDP 执行工具。负责：发布（`publish_with_guard.py` / `publish_pipeline.py` / `cdp_publish.py`）、竞品搜索、数据看板、评论回复、NLM 知识采集。不负责内容创作，由 wemedia 编排层调用。"
 ---
 
 # xiaohongshu：全平台创作者运营 Skill
@@ -187,3 +187,27 @@ python3 scripts/cdp_publish.py --headless respond-comment \
 ```text
 wemedia 交付 → main 执行 Step 7.5 → xiaohongshu / douyin 完成平台发布 → main 监控群通知兜底
 ```
+## 推荐发布入口（2026-03-25）
+
+默认推荐 main 调用：
+
+```bash
+python3 ~/.openclaw/skills/xiaohongshu-skill/scripts/publish_with_guard.py \
+  --pack ~/.openclaw/workspace/intel/collaboration/media/wemedia/xiaohongshu/{content_id}.md \
+  --step full
+```
+
+### 包装器能力
+- `validate_pack`：校验 XHS Publish Pack
+- `check_duplicate`：双保险去重（远端 content-data 同标题 + 本地 ledger content_id/title/image_paths）
+- `full`：执行发布 → content-data 核验 → 写入 ledger
+- `verify_publish`：单独验证标题是否已出现在 content-data
+
+### Ledger
+- 位置：`~/.openclaw/workspace/intel/collaboration/media/wemedia/xiaohongshu/publish-ledger.json`
+- 成功核验后自动写入
+
+### 当前 verify 策略
+- 通过 `cdp_publish.py content-data` 获取创作者内容数据
+- 解析返回 JSON 的 `rows[].title`
+- 标题命中即视为核验成功

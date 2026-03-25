@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Media downloader for Xiaohongshu publishing.
 
