@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -71,8 +72,37 @@ def parse_pack(path: str):
     return data
 
 
+def _normalize_topic_tags(tags):
+    normalized = []
+    for tag in tags or []:
+        t = str(tag).strip()
+        if not t:
+            continue
+        if t.startswith('#'):
+            t = t[1:]
+        t = re.sub(r'\s+', '', t)
+        if not t:
+            continue
+        normalized.append(f'#{t}')
+    return normalized
+
+
+def _extract_terminal_topic_tags(body: str):
+    lines = body.splitlines()
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if not lines:
+        return '', []
+    last_line = lines[-1].strip()
+    parts = [p for p in last_line.split() if p]
+    if parts and all(re.fullmatch(r'#[^\s#]+', part) for part in parts):
+        return '\n'.join(lines[:-1]).rstrip(), parts
+    return body.rstrip(), []
+
+
 def validate_pack(data):
     errors=[]
+    warnings=[]
     if data.get('platform') != 'xiaohongshu': errors.append('platform must be xiaohongshu')
     for k in ('content_id','title','body','image_paths'):
         if not data.get(k): errors.append(f'missing {k}')
@@ -80,7 +110,19 @@ def validate_pack(data):
         rp = str(Path(p).expanduser().resolve())
         if not os.path.isabs(rp) or not Path(rp).exists():
             errors.append(f'image missing: {p}')
-    return {'ok': not errors, 'errors': errors, 'data': data}
+
+    body = data.get('body') or ''
+    _, terminal_tags = _extract_terminal_topic_tags(body)
+    field_tags = _normalize_topic_tags(data.get('tags') or [])
+    if terminal_tags and field_tags:
+        if terminal_tags == field_tags:
+            errors.append('duplicate tag sources: body terminal hashtag line duplicates 标签 field; remove hashtags from 正文 and keep 标签 as the single source of truth')
+        else:
+            errors.append('conflicting tag sources: body terminal hashtag line does not match 标签 field; keep only 标签 field and remove hashtags from 正文')
+    elif terminal_tags and not field_tags:
+        warnings.append('legacy pack: terminal hashtag line detected in 正文 without 标签 field; compatible for now, but migrate tags into 标签 field')
+
+    return {'ok': not errors, 'errors': errors, 'warnings': warnings, 'data': data}
 
 
 def check_duplicate(data):
@@ -116,14 +158,26 @@ def check_duplicate(data):
     }
 
 
+def _strip_terminal_topic_line(body: str) -> str:
+    stripped, _ = _extract_terminal_topic_tags(body)
+    return stripped
+
+
+def _build_content_with_topic_line(data):
+    body = _strip_terminal_topic_line((data.get('body') or '').rstrip())
+    normalized = _normalize_topic_tags(data.get('tags') or [])
+    if normalized:
+        return f"{body}\n\n{' '.join(normalized)}\n" if body else f"{' '.join(normalized)}\n"
+    return (body + "\n") if body else ""
+
+
 def run_publish(data):
     body_file = Path(tempfile.mkdtemp(prefix='xhs_pack_')) / 'body.txt'
-    body_file.write_text(data['body'], encoding='utf-8')
+    body_file.write_text(_build_content_with_topic_line(data), encoding='utf-8')
     image_args = [str(Path(p).expanduser().resolve()) for p in data['image_paths']]
     cmd = [
         sys.executable,
-        str(SCRIPT_DIR / 'cdp_publish.py'),
-        'publish',
+        str(SCRIPT_DIR / 'publish_pipeline.py'),
         '--title', data['title'],
         '--content-file', str(body_file),
         '--images',
